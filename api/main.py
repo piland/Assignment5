@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 
 from .models import models, schemas
-from .controllers import orders, recipes, resources
+from .controllers import orders, recipes, resources, sandwiches, order_details
 from .dependencies.database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
@@ -126,5 +126,71 @@ def delete_one_resource(resource_id: int, db: Session = Depends(get_db)):
 #endregion
 
 #region sandwiches
+@app.post("/sandwiches/", response_model=schemas.Sandwich, tags=["Sandwiches"])
+def create_sandwich(sandwich: schemas.SandwichCreate, db: Session = Depends(get_db)):
+    return sandwiches.create(db=db, sandwich=sandwich)
 
+
+@app.get("/sandwiches/", response_model=list[schemas.Sandwich], tags=["Sandwiches"])
+def read_sandwichs(db: Session = Depends(get_db)):
+    return sandwiches.read_all(db)
+
+
+@app.get("/sandwiches/{sandwich_id}", response_model=schemas.Sandwich, tags=["Sandwiches"])
+def read_one_sandwich(sandwich_id: int, db: Session = Depends(get_db)):
+    sandwich = sandwiches.read_one(db, sandwich_id=sandwich_id)
+    if sandwich is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return sandwich
+
+
+@app.put("/sandwiches/{sandwich_id}", response_model=schemas.Sandwich, tags=["Sandwiches"])
+def update_one_sandwich(sandwich_id: int, sandwich: schemas.SandwichUpdate, db: Session = Depends(get_db)):
+    sandwich_db = sandwich.read_one(db, sandwich_id=sandwich_id)
+    if sandwich_db is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return sandwich.update(db=db, sandwich=sandwich, sandwich_id=sandwich_id)
+
+
+@app.delete("/sandwiches/{sandwich_id}", tags=["Sandwiches"])
+def delete_one_sandwich(sandwich_id: int, db: Session = Depends(get_db)):
+    sandwich = sandwiches.read_one(db, sandwich_id=sandwich_id)
+    if sandwich is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return sandwiches.delete(db=db, sandwich_id=sandwich_id)
+#endregion
+
+#region OrderDetails
+@app.post("/order_details/", response_model=schemas.OrderDetail, tags=["Order_detail"])
+def create_order_detail(order_detail: schemas.OrderDetailCreate, db: Session = Depends(get_db)):
+    return order_details.create(db=db, order_details=order_detail)
+
+
+@app.get("/order_details/", response_model=list[schemas.OrderDetail], tags=["Order_detail"])
+def read_order_details(db: Session = Depends(get_db)):
+    return order_details.read_all(db)
+
+
+@app.get("/order_details/{order_details_id}", response_model=schemas.OrderDetail, tags=["Order_detail"])
+def read_one_order_detail(order_detail_id: int, db: Session = Depends(get_db)):
+    order_detail = order_details.read_one(db, order_details_id=order_detail_id)
+    if order_detail is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return order_detail
+
+
+@app.put("/order_details/{order_details_id}", response_model=schemas.OrderDetail, tags=["Order_detail"])
+def update_one_order_detail(order_detail_id: int, order_detail: schemas.OrderDetailUpdate, db: Session = Depends(get_db)):
+    order_detail_db = order_details.read_one(db, order_details_id=order_detail_id)
+    if order_detail_db is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return order_details.update(db=db, order_details=order_details, order_details_id=order_detail_id)
+
+
+@app.delete("/order_details/{order_details_id}", tags=["Order_detail"])
+def delete_one_order_detail(order_detail_id: int, db: Session = Depends(get_db)):
+    order_detail = order_details.read_one(db, order_details_id=order_detail_id)
+    if order_detail is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return order_details.delete(db=db, order_details_id=order_detail_id)
 #endregion
