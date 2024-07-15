@@ -132,7 +132,7 @@ def create_sandwich(sandwich: schemas.SandwichCreate, db: Session = Depends(get_
 
 
 @app.get("/sandwiches/", response_model=list[schemas.Sandwich], tags=["Sandwiches"])
-def read_sandwichs(db: Session = Depends(get_db)):
+def read_sandwiches(db: Session = Depends(get_db)):
     return sandwiches.read_all(db)
 
 
